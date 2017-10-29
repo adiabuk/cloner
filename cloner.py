@@ -79,6 +79,7 @@ class GetAuth(dict):
         home = os.getenv('HOME')
         self.storage = home + '/.clonerrc'
         self.services = services
+        self.credentials = {}
         if value is not None:
             self.iter_values(value)
 
@@ -134,25 +135,29 @@ class GetAuth(dict):
             self[key] = default
         return self[key]
 
-    #def save_auth(self):
+    def save_auth(self):
+
+        pickle.dump(self.credentials, open(self.storage, "wb"))
 
 
     def get_auth(self):
         """ try to get auth from file """
         try:
-            credentials = pickle.load(open(self.storage, "rb"))
+            self.credentials = pickle.load(open(self.storage, "rb"))
+            self.iter_values(self.credentials)
+            return self.credentials
         except (EOFError, IOError):
-            credentials = None
-        credentials = dict()
-        if not credentials:
+            self.credentials = {}
+
+        if not self.credentials:
             for service in self.services:
                 username, password = self.auth_input(service)
-                credentials[service] = {}
-                credentials[service]['username'] = username
-                credentials[service]['password'] = password
-            self.iter_values(credentials)
-
-            return credentials
+                self.credentials[service] = {}
+                self.credentials[service]['username'] = username
+                self.credentials[service]['password'] = password
+            self.iter_values(self.credentials)
+            self.save_auth()
+            return self.credentials
 
     @classmethod
     def auth_input(cls, service):

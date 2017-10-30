@@ -85,11 +85,9 @@ class GetAuth(dict):
 
     def iter_values(self, value):
         """ iterate through values """
-        #print "Calling iter values"
         if value is None:
             pass
         elif isinstance(value, dict):
-            #print "is instance dict"
             for key in value:
                 #print "key ", key, value[key]
                 self.__setitem__(key, value[key])
@@ -105,11 +103,7 @@ class GetAuth(dict):
             target[rest_of_key] = value
         else:
             if isinstance(value, dict) and not isinstance(value, GetAuth):
-                #print "getting here"
                 value = GetAuth(value=value)
-                #print type(value), 'xxx'
-                #print value.username, 'ppp'
-                #print key, value
             dict.__setitem__(self, key, value)
 
     def __getitem__(self, key):
@@ -167,21 +161,18 @@ class GetAuth(dict):
         return username, password
 
     def __getattr__(self, item):
-        #print "calling get attr"
         return self[item] if item in self else None
 
 def main():
     """ main func """
     auth = GetAuth(services=['bitbucket', 'github'])
     auth.get_auth()
-    print 'poouser', auth.bitbucket.username
-    print 'poopass', auth.bitbucket.password
     ssh = SshRepo(auth.bitbucket.username, auth.bitbucket.password)
 
-    path = '/tmp/poo'
+    path = raw_input('Input path to clone directories: ')
     for repo in do_gh(auth.github.username, auth.github.password):
         ssh.clone_repo(repo.ssh_url, path)
-    print "gg"
+    print "Cloning Github repos"
     for repo in do_bb(auth.bitbucket.username, auth.bitbucket.password):
         ssh.clone_repo(repo, path)
 if __name__ == '__main__':

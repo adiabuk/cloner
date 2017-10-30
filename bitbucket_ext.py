@@ -24,7 +24,6 @@ def do_bb(username, password):
     )
 
     user = bucket.user(owner)
-    print user
     repos = sorted(user.repositories(), key=lambda repo: repo.get("name"))
     urls = []
 

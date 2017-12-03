@@ -1,0 +1,4 @@
+bitbucket==0.4a
+GitPython==2.1.7
+PyGithub==1.35
+pygit==0.1

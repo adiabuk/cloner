@@ -1,15 +1,21 @@
 #!/usr/bin/env python
+# PYTHON_ARG_COMPLETE_OK
 
 """ Clone all your repositories from github & bitbucket"""
+
+from __future__ import print_function
 
 import os
 import re
 import pickle
 import sys
+import argparse
 
 from getpass import getpass
+import argcomplete
 from git import Repo, Git
 from git.exc import GitCommandError
+
 
 from bitbucket_ext import do_bb
 from github_ext import do_gh
@@ -92,14 +98,14 @@ class GetAuth(dict):
                 #print "key ", key, value[key]
                 self.__setitem__(key, value[key])
         else:
-            raise TypeError, 'expected dict'
+            raise TypeError('expected dict')
 
     def __setitem__(self, key, value):
         if '.' in key:
             my_key, rest_of_key = key.split('.', 1)
             target = self.setdefault(my_key, GetAuth())
             if not isinstance(target, GetAuth):
-                raise KeyError, 'cannot set "%s" in "%s" (%s)' % (rest_of_key, my_key, repr(target))
+                raise KeyError('cannot set "%s" in "%s" (%s)' % (rest_of_key, my_key, repr(target)))
             target[rest_of_key] = value
         else:
             if isinstance(value, dict) and not isinstance(value, GetAuth):
@@ -112,7 +118,7 @@ class GetAuth(dict):
         my_key, rest_of_key = key.split('.', 1)
         target = dict.__getitem__(self, my_key)
         if not isinstance(target, GetAuth):
-            raise KeyError, 'cannot get "%s" in "%s" (%s)' % (rest_of_key, my_key, repr(target))
+            raise KeyError('cannot get "%s" in "%s" (%s)' % (rest_of_key, my_key, repr(target)))
         return target[rest_of_key]
 
     def __contains__(self, key):
@@ -163,17 +169,31 @@ class GetAuth(dict):
     def __getattr__(self, item):
         return self[item] if item in self else None
 
-def main():
-    """ main func """
-    auth = GetAuth(services=['bitbucket', 'github'])
+def run(contains=''):
+    """ run func """
+    auth = GetAuth(services=('bitbucket', 'github'))
     auth.get_auth()
     ssh = SshRepo(auth.bitbucket.username, auth.bitbucket.password)
 
     path = raw_input('Input path to clone directories: ')
+    print("Cloning Github repos")
     for repo in do_gh(auth.github.username, auth.github.password):
-        ssh.clone_repo(repo.ssh_url, path)
-    print "Cloning Github repos"
+        print(repo.ssh_url, contains)
+        if contains.lower() in repo.ssh_url.lower():
+            ssh.clone_repo(repo.ssh_url, path)
+
+    print("Cloning Bitbucket repos")
     for repo in do_bb(auth.bitbucket.username, auth.bitbucket.password):
         ssh.clone_repo(repo, path)
+
+def main():
+    """main function"""
+    parser = argparse.ArgumentParser(sys.argv[0])
+    parser.add_argument('-c', '--contains', required=False,
+                        action='store', help='match repos containing given string')
+    argcomplete.autocomplete(parser)
+    args = parser.parse_args()
+    run(args.contains)
+
 if __name__ == '__main__':
     main()

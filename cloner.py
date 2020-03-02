@@ -3,7 +3,7 @@
 
 """ Clone all your repositories from github & bitbucket"""
 
-from __future__ import print_function
+
 
 import os
 import re
@@ -162,7 +162,7 @@ class GetAuth(dict):
     @classmethod
     def auth_input(cls, service):
         """ get user input from console """
-        username = raw_input('Enter your {0} username: '.format(service))
+        username = input('Enter your {0} username: '.format(service))
         password = getpass(prompt='Enter your {0} password: '.format(service))
         return username, password
 
@@ -175,7 +175,7 @@ def run(contains=''):
     auth.get_auth()
     ssh = SshRepo(auth.bitbucket.username, auth.bitbucket.password)
 
-    path = raw_input('Input path to clone directories: ')
+    path = input('Input path to clone directories: ')
     print("Cloning Github repos")
     for repo in do_gh(auth.github.username, auth.github.password):
         print(repo.ssh_url, contains)

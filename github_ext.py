@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
+
 from platform import python_version_tuple
 from github import Github
 

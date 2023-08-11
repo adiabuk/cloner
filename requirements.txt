@@ -1,4 +1,4 @@
 argcomplete==1.10.0
 BitBucket==0.4a0
-GitPython==2.1.15
+GitPython==3.1.32
 PyGithub==1.45
